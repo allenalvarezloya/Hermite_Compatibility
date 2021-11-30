@@ -7,14 +7,15 @@ extern "C" void dgetrs_(char *,int *, int *, double *, int *, int *, double *, i
 int main(){
 	int m = 2;
 	int COUNT = 1;
+	int refine = 4;
 	Darray1 errors1, errors2, errorsinf;
-	errors1.define(1,6);
-	errors2.define(1,6);
-	errorsinf.define(1,6);
+	errors1.define(1,refine);
+	errors2.define(1,refine);
+	errorsinf.define(1,refine);
 	errors1.set_value(0.0);
 	errors2.set_value(0.0);
 	errorsinf.set_value(0.0); 
-	for(int n = 5; n <= 160; n *= 2){
+	for(int n = 5; n <= 5*pow(2,refine-1); n *= 2){
 		int nr = n;
 		int ns = 4*n;
 		// Allocate memory for solution arrays (Primal)
@@ -92,7 +93,7 @@ int main(){
 				}
 			}
 			t += dt;
-			cout << t << endl;
+			cout << "time = " << t << endl;
 		    // Hermite.interpolate_pd(u,v); // Interpolate primal to dual
 	    	// Hermite.oversample(Hermite.ud_interp,t,COUNT); // Oversample solution
 	    	// COUNT += 1;
@@ -101,23 +102,20 @@ int main(){
 		Hermite.oversample(Hermite.ud_interp,t,errors1,errors2,errorsinf,COUNT); // Oversample solution
 		COUNT += 1;
 	}
-	// errors1.writeToFile("L1errors.ext",1,2);
-	// errors2.writeToFile("L2errors.ext",1,2);
-	// errorsinf.writeToFile("Linferrors.ext",1,2);
 	FILE *extFile1 = fopen("L1errors.ext", "w");
-    for (int i=1; i<=6; i++){
+    for (int i=1; i<=refine; i++){
         fprintf(extFile1, " %18.10e", errors1(i));
         fprintf(extFile1,"\n");
     }   
     fclose(extFile1);
 	FILE *extFile2 = fopen("L2errors.ext", "w");
-    for (int i=1; i<=6; i++){
+    for (int i=1; i<=refine; i++){
         fprintf(extFile2, " %18.10e", errors2(i));
         fprintf(extFile2,"\n");
     }   
     fclose(extFile2);
     	FILE *extFileinf = fopen("Linferrors.ext", "w");
-    for (int i=1; i<=6; i++){
+    for (int i=1; i<=refine; i++){
         fprintf(extFileinf, " %18.10e", errorsinf(i));
         fprintf(extFileinf,"\n");
     }   

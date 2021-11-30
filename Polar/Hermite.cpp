@@ -1282,9 +1282,6 @@ void Hermite::oversample(Darray4 &u,double time,Darray1 &errors1,Darray1 &errors
     L1error *= Hr*Hs;
     L2error *= Hr*Hs;
     L2error = pow(L2error,0.5);
-    cout << L1error << endl;
-    cout << L2error << endl;
-    cout << Linferror << endl;
     errors1(COUNT) = L1error;
     errors2(COUNT) = L2error;
     errorsinf(COUNT) = Linferror;

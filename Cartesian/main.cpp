@@ -15,7 +15,7 @@ int main(){
 	errors1.set_value(0.0);
 	errors2.set_value(0.0);
 	errorsinf.set_value(0.0); 
-	for(int n = 10; n <= 10*2*refine; n *= 2){
+	for(int n = 10; n <= 10*pow(2,refine-1); n *= 2){
 		int nr = n;
 		int ns = n;
 		// // Allocate memory for solution arrays (Primal)

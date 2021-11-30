@@ -86,7 +86,7 @@ int main(){
 				}
 			}
 			t += dt;
-			cout << t << endl;
+			cout << "time = " << t << endl;
 	    }
 	    Hermite.interpolate_pd(u,v); // Interpolate primal to dual
 		Hermite.oversample(Hermite.ud_interp,t,errors1,errors2,errorsinf,COUNT); // Oversample solution

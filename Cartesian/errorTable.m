@@ -2,7 +2,7 @@ load('L1errors.ext')
 load('L2errors.ext')
 load('Linferrors.ext')
 m = 3;
-Ncells = [5 10 20 40 80];
+Ncells = [10 20 40];
 
 conv1 = log2(L1errors(1:end-1)./L1errors(2:end));
 conv2 = log2(L2errors(1:end-1)./L2errors(2:end));

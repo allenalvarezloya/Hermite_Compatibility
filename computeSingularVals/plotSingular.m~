@@ -1,0 +1,6 @@
+SingularVals = dir('Singular*.ext');
+s = load(SingularVals(1).name);
+S = zeros(length(s),length(SingularVals));
+for k = 1:length(SingularVals)
+    S
+surf(S)

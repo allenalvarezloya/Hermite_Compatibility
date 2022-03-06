@@ -19,7 +19,7 @@ for i = 1:N
     s1 = load(S1(i).name);
     s2 = load(S2(i).name);
     plot(x1,s1,x2,s2,'LineWidth',2)
-%     axis([0 1 -1 1])
+    axis([-1 1 -3 3])
     drawnow
 %     currFrame = getframe(gcf);
 %     writeVideo(vidObj,currFrame);

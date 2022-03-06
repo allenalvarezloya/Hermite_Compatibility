@@ -29,8 +29,8 @@ public:
         double *a01,double* a10,double* a11,double* a12,double* a22,double *MM);
     void M2(double rA,double rB,double sA,double sB,double hr,double hs,
         double *a01,double* a10,double* a11,double* a12,double* a22,double *MM);
-    // void M3(double rA,double rB,double sA,double sB,double hr,double hs,
-    //     double *a01,double* a10,double* a11,double* a12,double* a22,double *MM);
+    void M3(double rA,double rB,double sA,double sB,double hr,double hs,
+        double *a01,double* a10,double* a11,double* a12,double* a22,double *MM);
     void boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v,Darray4 &A01,Darray4 & A10,Darray4 & A11,Darray4 &A12,Darray4 & A22);
     void BoundaryPeriodic(Darray4 &ud, Darray4 &vd);
     void oversample(Darray4 &u,double time,Darray1 &errors1,Darray1 &errors2,Darray1 &errorsinf,int COUNT);

@@ -5,10 +5,10 @@
 using namespace std;
 extern "C" void dgetrs_(char *,int *, int *, double *, int *, int *, double *, int *, int *);
 int main(){
-	int m = 3;
+	int m = 2;
 	int COUNT = 1;
 	int plotCOUNT = 1;
-	int refine = 3;
+	int refine = 1;
 	Darray1 errors1, errors2, errorsinf;
 	errors1.define(1,refine);
 	errors2.define(1,refine);
@@ -143,6 +143,7 @@ int main(){
 			cout << "time = " << t << " Max = " << u.getMax() << endl;
 			// plotCOUNT += 1;
 	    }
+	    cout << endl;
 	    Hermite.interpolate_pd(u,v); // Interpolate primal to dual
 		Hermite.oversample(Hermite.ud_interp,U_refined,nsample_r,nsample_s); // Oversample solution
 		Hermite.oversample(SetUp.Xd,X_refined,nsample_r,nsample_s);

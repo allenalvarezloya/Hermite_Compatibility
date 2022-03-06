@@ -737,8 +737,7 @@ void columnScale(Darray2 &A,Darray1 &b, int m){
         // cout << j << " cSum " << cSum(j) << endl;
     }
 }
-void Hermite::computeSingular(int m,double hr,double hs,
-    Darray4 &A01,Darray4 & A10,Darray4 & A11,Darray4 &A12,Darray4 & A22,int ns){
+void Hermite::computeSingular(int m,Darray2 Mat_u,int ns){
 
         // SVD LAPACK STUFF
         int Mboundary = (2*m+2)*(2*m+2);
@@ -764,45 +763,45 @@ void Hermite::computeSingular(int m,double hr,double hs,
         double * VT_ptr = VT.c_ptr();
         double * work_ptr = work.c_ptr();
         // Define arrays
-        Darray2 a10, a01, a11, a12, a22;
-        a10.define(0,2*m+1+2,0,2*m+1+2);
-        a01.define(0,2*m+1+2,0,2*m+1+2);
-        a11.define(0,2*m+1+2,0,2*m+1+2);
-        a12.define(0,2*m+1+2,0,2*m+1+2);
-        a22.define(0,2*m+1+2,0,2*m+1+2);
-        a10.set_value(0.0);
-        a01.set_value(0.0);
-        a11.set_value(0.0);
-        a12.set_value(0.0);
-        a22.set_value(0.0);
-        double* a10_ptr = a10.c_ptr();
-        double* a01_ptr = a01.c_ptr();
-        double* a11_ptr = a11.c_ptr();
-        double* a12_ptr = a12.c_ptr();
-        double* a22_ptr = a22.c_ptr();
-        Darray2 Mat_u;
-        Mat_u.define(0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1);
-        Mat_u.set_value(0.0);
+        // Darray2 a10, a01, a11, a12, a22;
+        // a10.define(0,2*m+1+2,0,2*m+1+2);
+        // a01.define(0,2*m+1+2,0,2*m+1+2);
+        // a11.define(0,2*m+1+2,0,2*m+1+2);
+        // a12.define(0,2*m+1+2,0,2*m+1+2);
+        // a22.define(0,2*m+1+2,0,2*m+1+2);
+        // a10.set_value(0.0);
+        // a01.set_value(0.0);
+        // a11.set_value(0.0);
+        // a12.set_value(0.0);
+        // a22.set_value(0.0);
+        // double* a10_ptr = a10.c_ptr();
+        // double* a01_ptr = a01.c_ptr();
+        // double* a11_ptr = a11.c_ptr();
+        // double* a12_ptr = a12.c_ptr();
+        // double* a22_ptr = a22.c_ptr();
+        // Darray2 Mat_u;
+        // Mat_u.define(0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1);
+        // Mat_u.set_value(0.0);
         double* Mat_u_ptr = Mat_u.c_ptr();
         // Create matrix
-        double rA,rB,sA,sB;
-        rA = 0.5;
-        rB = 0.5;
-        sA = 0.5;
-        sB = -0.5;
-        int m2p1 = 2*m+1;
-        // Set variable Coefficient values
-        for(int idr = 0; idr <= m2p1; idr++){
-            for(int ids = 0; ids <= m2p1; ids++){
-                a01(idr,ids) = A01(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
-                a10(idr,ids) = A10(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
-                a11(idr,ids) = A11(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
-                a12(idr,ids) = A12(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
-                a22(idr,ids) = A22(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
-            }
-        }
+        // double rA,rB,sA,sB;
+        // rA = 0.5;
+        // rB = 0.5;
+        // sA = 0.5;
+        // sB = -0.5;
+        // int m2p1 = 2*m+1;
+        // // Set variable Coefficient values
+        // for(int idr = 0; idr <= m2p1; idr++){
+        //     for(int ids = 0; ids <= m2p1; ids++){
+        //         a01(idr,ids) = A01(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
+        //         a10(idr,ids) = A10(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
+        //         a11(idr,ids) = A11(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
+        //         a12(idr,ids) = A12(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
+        //         a22(idr,ids) = A22(idr,ids,0,1)/(pow(hr,idr)*pow(hs,ids));
+        //     }
+        // }
 
-    bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr,m);
+    // bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr,m);
     dgesvd_(& JOBU,& JOBVT,&Mboundary,&Mboundary,Mat_u_ptr,&Mboundary,S_ptr,U_ptr,&Mboundary,VT_ptr,&Mboundary,work_ptr,&Lwork,&INFO);
     cout << "INFO = " << INFO << endl;
     char fName[100];
@@ -863,7 +862,85 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
     int offset = 0;
     int COUNT = 0;
 
-    for(int j = 1; j <= ns-1; j++){
+    Darray1 rhs_u_perm;
+    rhs_u_perm.define(0,(2*m+2)*(2*m+2)-1);
+    rhs_u_perm.set_value(0.0);
+
+    Darray1 rhs_v_perm;
+    rhs_v_perm.define(0,(2*m)*(2*m)-1);
+    rhs_v_perm.set_value(0.0);
+
+    //  Equilibrium
+    Darray1 A;
+    A.define(0,(2*m+2)*(2*m+2)*(2*m+2)*(2*m+2)-1);
+    A.set_value(0.0);
+    double *A_ptr = A.c_ptr();
+
+    int N, NE,LENC_number;
+    N = (2*m+2)*(2*m+2);
+    NE = (2*m+2)*(2*m+2)*(2*m+2)*(2*m+2);
+    LENC_number = (2*m+2)*(2*m+2);
+    Darray2 A_mat;
+    A_mat.define(0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1);
+    A_mat.set_value(0.0);
+    double *A_mat_ptr = A_mat.c_ptr();
+
+    Darray2 B_mat;
+    B_mat.define(0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1);
+    B_mat.set_value(0.0);
+    double *B_mat_ptr = B_mat.c_ptr();
+
+    Darray1 ROW;
+    ROW.define(0,(2*m+2)*(2*m+2)-1);
+    ROW.set_value(0.0);
+    double * ROW_ptr = ROW.c_ptr();
+
+    Darray1 COL;
+    COL.define(0,(2*m+2)*(2*m+2)-1);
+    COL.set_value(0.0);
+    double * COL_ptr = COL.c_ptr();
+
+    Darray1 PERM;
+    PERM.define(0,(2*m+2)*(2*m+2)-1);
+    PERM.set_value(0.0);
+    double * PERM_ptr = PERM.c_ptr();
+
+    // For v
+    Darray1 Av;
+    Av.define(0,(2*m)*(2*m)*(2*m)*(2*m)-1);
+    Av.set_value(0.0);
+    double *Av_ptr = Av.c_ptr();
+
+    int Nv, NEv,LENC_numberv;
+    Nv = (2*m)*(2*m);
+    NEv = (2*m)*(2*m)*(2*m)*(2*m);
+    LENC_numberv = (2*m)*(2*m);
+    Darray2 A_matv;
+    A_matv.define(0,(2*m)*(2*m)-1,0,(2*m)*(2*m)-1);
+    A_matv.set_value(0.0);
+    double *A_matv_ptr = A_matv.c_ptr();
+
+    Darray2 B_matv;
+    B_matv.define(0,(2*m)*(2*m)-1,0,(2*m)*(2*m)-1);
+    B_matv.set_value(0.0);
+    double *B_matv_ptr = B_matv.c_ptr();
+
+    Darray1 ROWv;
+    ROWv.define(0,(2*m)*(2*m)-1);
+    ROWv.set_value(0.0);
+    double * ROWv_ptr = ROWv.c_ptr();
+
+    Darray1 COLv;
+    COLv.define(0,(2*m)*(2*m)-1);
+    COLv.set_value(0.0);
+    double * COLv_ptr = COLv.c_ptr();
+
+    Darray1 PERMv;
+    PERMv.define(0,(2*m)*(2*m)-1);
+    PERMv.set_value(0.0);
+    double * PERMv_ptr = PERMv.c_ptr();
+
+    for(int j = 1; j <= ns - 1; j++){
         // Left side
         rA = 0.5;
         rB = 0.5;
@@ -891,18 +968,43 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
             }
         }
         bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr,m);
-        columnScale(Mat_u,rhs_u,m);
-        // dgesvd_(& JOBU,& JOBVT,&Mboundary,&Mboundary,Mat_u_ptr,&Mboundary,S_ptr,U_ptr,&Mboundary,VT_ptr,&Mboundary,work_ptr,&Lwork,&INFO);
-        // cout << "INFO = " << INFO << endl;
-        // sprintf(fName, "Singular%0.5d.ext",n);
-        // outPutVec(S,0,(2*m+2)*(2*m+2)-1,fName);
-        // sprintf(fName,"U.ext");
-        // outPutMat(U,0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1,fName);
-        // sprintf(fName,"VT.ext");
-        // outPutMat(VT,0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1,fName);
+        // Equilibriate
+        COUNT = 0;
+        for(int j = 0; j <= (2*m+2)*(2*m+2)-1;j++){
+            for(int i = 0; i <= (2*m+2)*(2*m+2)-1;i++){
+                A(COUNT) = Mat_u(i,j);      
+                COUNT += 1;
+            }
+        }
+        eq_(A_ptr,&N,&NE,&LENC_number,ROW_ptr,COL_ptr,PERM_ptr);
+        COUNT = 0;
+        for(int j = 0; j <= (2*m+2)*(2*m+2)-1;j++){
+            for(int i = 0; i <= (2*m+2)*(2*m+2)-1;i++){
+                A_mat(i,j) = Mat_u(i,j)*exp(ROW(i)+COL(j));      
+            }
+        }
+        for(int j = 0; j <= (2*m+2)*(2*m+2)-1; j++){
+            for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+                B_mat(i,j) = A_mat(i,PERM(j)-1);
+            }
+        }
+        sprintf(fName, "M%0.5d.ext",j);
+        outPutMat(Mat_u,0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1,fName);
+        sprintf(fName, "B%0.5d.ext",j);
+        outPutMat(B_mat,0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1,fName);
+        dgetrf_(&Mboundary,&Nboundary,B_mat_ptr,&LDAboundary,IPIV,&INFO); 
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+            rhs_u(i) *= exp(ROW(i));
+        }
+        dgetrs_(&no,&Nboundary,&ONE,B_mat_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+            rhs_u_perm(PERM(i)-1) = rhs_u(i);
+        }
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+            rhs_u(i) = rhs_u_perm(i)*exp(COL(i));
+        }
+        // End Equilibriate
 
-        dgetrf_(&Mboundary,&Nboundary,Mat_u_ptr,&LDAboundary,IPIV,&INFO);                  // Factor matrix
-        dgetrs_(&no,&Nboundary,&ONE,Mat_u_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
         COUNT = 0;
         for(int ids = 0;ids<=2*m+1;ids++){
             for(int idr = 0;idr<=2*m+1;idr++){
@@ -923,9 +1025,38 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
             }
         }
         bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr,m_minus);
-        columnScale(Mat_v,rhs_v,m-1);
-        dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);                // Factor matrix
-        dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
+        // Equilibriate
+        COUNT = 0;
+        for(int j = 0; j <= (2*m)*(2*m)-1;j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1;i++){
+                Av(COUNT) = Mat_v(i,j);      
+                COUNT += 1;
+            }
+        }
+        eq_(Av_ptr,&Nv,&NEv,&LENC_numberv,ROWv_ptr,COLv_ptr,PERMv_ptr);
+        COUNT = 0;
+        for(int j = 0; j <= (2*m)*(2*m)-1;j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1;i++){
+                A_matv(i,j) = Mat_v(i,j)*exp(ROWv(i)+COLv(j));      
+            }
+        }
+        for(int j = 0; j <= (2*m)*(2*m)-1; j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+                B_matv(i,j) = A_matv(i,PERMv(j)-1);
+            }
+        }
+        dgetrf_(&Mboundary_v,&Nboundary_v,B_matv_ptr,&LDAboundary_v,IPIV_v,&INFO); 
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v(i) *= exp(ROWv(i));
+        }
+        dgetrs_(&no,&Nboundary_v,&ONE,B_matv_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v_perm(PERMv(i)-1) = rhs_v(i);
+        }
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v(i) = rhs_v_perm(i)*exp(COLv(i));
+        }
+        // End Equilibriate
         COUNT = 0;
         for(int ids = 0;ids<=2*m-1;ids++){
             for(int idr = 0;idr<=2*m-1;idr++){
@@ -961,11 +1092,38 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
             }
         }
         bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr,m);
-        columnScale(Mat_u,rhs_u,m);
-        sprintf(fName, "Mu_outer.ext");
-        outPutMat(Mat_u,0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1,fName);
-        dgetrf_(&Mboundary,&Nboundary,Mat_u_ptr,&LDAboundary,IPIV,&INFO);                  // Factor matrix
-        dgetrs_(&no,&Nboundary,&ONE,Mat_u_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
+        // Equilibriate
+        COUNT = 0;
+        for(int j = 0; j <= (2*m+2)*(2*m+2)-1;j++){
+            for(int i = 0; i <= (2*m+2)*(2*m+2)-1;i++){
+                A(COUNT) = Mat_u(i,j);      
+                COUNT += 1;
+            }
+        }
+        eq_(A_ptr,&N,&NE,&LENC_number,ROW_ptr,COL_ptr,PERM_ptr);
+        COUNT = 0;
+        for(int j = 0; j <= (2*m+2)*(2*m+2)-1;j++){
+            for(int i = 0; i <= (2*m+2)*(2*m+2)-1;i++){
+                A_mat(i,j) = Mat_u(i,j)*exp(ROW(i)+COL(j));      
+            }
+        }
+        for(int j = 0; j <= (2*m+2)*(2*m+2)-1; j++){
+            for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+                B_mat(i,j) = A_mat(i,PERM(j)-1);
+            }
+        }
+        dgetrf_(&Mboundary,&Nboundary,B_mat_ptr,&LDAboundary,IPIV,&INFO); 
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+            rhs_u(i) *= exp(ROW(i));
+        }
+        dgetrs_(&no,&Nboundary,&ONE,B_mat_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+            rhs_u_perm(PERM(i)-1) = rhs_u(i);
+        }
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+            rhs_u(i) = rhs_u_perm(i)*exp(COL(i));
+        }
+        // End Equilibriate
         COUNT = 0;
         for(int ids = 0;ids<=2*m+1;ids++){
             for(int idr = 0;idr<=2*m+1;idr++){
@@ -986,9 +1144,38 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
             }
         }
         bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr,m_minus);
-        columnScale(Mat_v,rhs_v,m-1);
-        dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);                  // Factor matrix
-        dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
+        // Equilibriate
+        COUNT = 0;
+        for(int j = 0; j <= (2*m)*(2*m)-1;j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1;i++){
+                Av(COUNT) = Mat_v(i,j);      
+                COUNT += 1;
+            }
+        }
+        eq_(Av_ptr,&Nv,&NEv,&LENC_numberv,ROWv_ptr,COLv_ptr,PERMv_ptr);
+        COUNT = 0;
+        for(int j = 0; j <= (2*m)*(2*m)-1;j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1;i++){
+                A_matv(i,j) = Mat_v(i,j)*exp(ROWv(i)+COLv(j));      
+            }
+        }
+        for(int j = 0; j <= (2*m)*(2*m)-1; j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+                B_matv(i,j) = A_matv(i,PERMv(j)-1);
+            }
+        }
+        dgetrf_(&Mboundary_v,&Nboundary_v,B_matv_ptr,&LDAboundary_v,IPIV_v,&INFO); 
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v(i) *= exp(ROWv(i));
+        }
+        dgetrs_(&no,&Nboundary_v,&ONE,B_matv_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v_perm(PERMv(i)-1) = rhs_v(i);
+        }
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v(i) = rhs_v_perm(i)*exp(COLv(i));
+        }
+        // End Equilibriate
         COUNT = 0;
         for(int ids = 0;ids<=2*m-1;ids++){
             for(int idr = 0;idr<=2*m-1;idr++){
@@ -1027,8 +1214,38 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
     }
     bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr,m);
     columnScale(Mat_u,rhs_u,m);
-    dgetrf_(&Mboundary,&Nboundary,Mat_u_ptr,&LDAboundary,IPIV,&INFO);                  // Factor matrix
-    dgetrs_(&no,&Nboundary,&ONE,Mat_u_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
+    // Equilibriate
+    COUNT = 0;
+    for(int j = 0; j <= (2*m+2)*(2*m+2)-1;j++){
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1;i++){
+            A(COUNT) = Mat_u(i,j);      
+            COUNT += 1;
+        }
+    }
+    eq_(A_ptr,&N,&NE,&LENC_number,ROW_ptr,COL_ptr,PERM_ptr);
+    COUNT = 0;
+    for(int j = 0; j <= (2*m+2)*(2*m+2)-1;j++){
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1;i++){
+            A_mat(i,j) = Mat_u(i,j)*exp(ROW(i)+COL(j));      
+        }
+    }
+    for(int j = 0; j <= (2*m+2)*(2*m+2)-1; j++){
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+            B_mat(i,j) = A_mat(i,PERM(j)-1);
+        }
+    }
+    dgetrf_(&Mboundary,&Nboundary,B_mat_ptr,&LDAboundary,IPIV,&INFO); 
+    for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+        rhs_u(i) *= exp(ROW(i));
+    }
+    dgetrs_(&no,&Nboundary,&ONE,B_mat_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
+    for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+        rhs_u_perm(PERM(i)-1) = rhs_u(i);
+    }
+    for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+        rhs_u(i) = rhs_u_perm(i)*exp(COL(i));
+    }
+    // End equilibriate
     COUNT = 0;
     for(int ids = 0;ids<=2*m+1;ids++){
         for(int idr = 0;idr<=2*m+1;idr++){
@@ -1050,9 +1267,38 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
         }
     }
     bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr,m_minus);
-    columnScale(Mat_v,rhs_v,m-1);
-    dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);                // Factor matrix
-    dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
+    // Equilibriate
+    COUNT = 0;
+    for(int j = 0; j <= (2*m)*(2*m)-1;j++){
+        for(int i = 0; i <= (2*m)*(2*m)-1;i++){
+            Av(COUNT) = Mat_v(i,j);      
+            COUNT += 1;
+        }
+    }
+    eq_(Av_ptr,&Nv,&NEv,&LENC_numberv,ROWv_ptr,COLv_ptr,PERMv_ptr);
+    COUNT = 0;
+    for(int j = 0; j <= (2*m)*(2*m)-1;j++){
+        for(int i = 0; i <= (2*m)*(2*m)-1;i++){
+            A_matv(i,j) = Mat_v(i,j)*exp(ROWv(i)+COLv(j));      
+        }
+    }
+    for(int j = 0; j <= (2*m)*(2*m)-1; j++){
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            B_matv(i,j) = A_matv(i,PERMv(j)-1);
+        }
+    }
+    dgetrf_(&Mboundary_v,&Nboundary_v,B_matv_ptr,&LDAboundary_v,IPIV_v,&INFO); 
+    for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+        rhs_v(i) *= exp(ROWv(i));
+    }
+    dgetrs_(&no,&Nboundary_v,&ONE,B_matv_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
+    for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+        rhs_v_perm(PERMv(i)-1) = rhs_v(i);
+    }
+    for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+        rhs_v(i) = rhs_v_perm(i)*exp(COLv(i));
+    }
+    // End Equilibriate
     COUNT = 0;
     for(int ids = 0;ids<=2*m-1;ids++){
         for(int idr = 0;idr<=2*m-1;idr++){
@@ -1089,9 +1335,38 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
         }
     }
     bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr,m);
-    columnScale(Mat_u,rhs_u,m);
-    dgetrf_(&Mboundary,&Nboundary,Mat_u_ptr,&LDAboundary,IPIV,&INFO);                  // Factor matrix
-    dgetrs_(&no,&Nboundary,&ONE,Mat_u_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
+    // Equilibriate
+    COUNT = 0;
+    for(int j = 0; j <= (2*m+2)*(2*m+2)-1;j++){
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1;i++){
+            A(COUNT) = Mat_u(i,j);      
+            COUNT += 1;
+        }
+    }
+    eq_(A_ptr,&N,&NE,&LENC_number,ROW_ptr,COL_ptr,PERM_ptr);
+    COUNT = 0;
+    for(int j = 0; j <= (2*m+2)*(2*m+2)-1;j++){
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1;i++){
+            A_mat(i,j) = Mat_u(i,j)*exp(ROW(i)+COL(j));      
+        }
+    }
+    for(int j = 0; j <= (2*m+2)*(2*m+2)-1; j++){
+        for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+            B_mat(i,j) = A_mat(i,PERM(j)-1);
+        }
+    }
+    dgetrf_(&Mboundary,&Nboundary,B_mat_ptr,&LDAboundary,IPIV,&INFO); 
+    for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+        rhs_u(i) *= exp(ROW(i));
+    }
+    dgetrs_(&no,&Nboundary,&ONE,B_mat_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
+    for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+        rhs_u_perm(PERM(i)-1) = rhs_u(i);
+    }
+    for(int i = 0; i <= (2*m+2)*(2*m+2)-1; i++){
+        rhs_u(i) = rhs_u_perm(i)*exp(COL(i));
+    }
+    // End Equilibriate
     COUNT = 0;
     for(int ids = 0;ids<=2*m+1;ids++){
         for(int idr = 0;idr<=2*m+1;idr++){
@@ -1113,9 +1388,38 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
         }
     }
     bcMat(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr,m_minus);
-    columnScale(Mat_v,rhs_v,m-1);
-    dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);                  // Factor matrix
-    dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
+        // Equilibriate
+        COUNT = 0;
+        for(int j = 0; j <= (2*m)*(2*m)-1;j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1;i++){
+                Av(COUNT) = Mat_v(i,j);      
+                COUNT += 1;
+            }
+        }
+        eq_(Av_ptr,&Nv,&NEv,&LENC_numberv,ROWv_ptr,COLv_ptr,PERMv_ptr);
+        COUNT = 0;
+        for(int j = 0; j <= (2*m)*(2*m)-1;j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1;i++){
+                A_matv(i,j) = Mat_v(i,j)*exp(ROWv(i)+COLv(j));      
+            }
+        }
+        for(int j = 0; j <= (2*m)*(2*m)-1; j++){
+            for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+                B_matv(i,j) = A_matv(i,PERMv(j)-1);
+            }
+        }
+        dgetrf_(&Mboundary_v,&Nboundary_v,B_matv_ptr,&LDAboundary_v,IPIV_v,&INFO); 
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v(i) *= exp(ROWv(i));
+        }
+        dgetrs_(&no,&Nboundary_v,&ONE,B_matv_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v_perm(PERMv(i)-1) = rhs_v(i);
+        }
+        for(int i = 0; i <= (2*m)*(2*m)-1; i++){
+            rhs_v(i) = rhs_v_perm(i)*exp(COLv(i));
+        }
+        // End Equilibriate
     COUNT = 0;
     for(int ids = 0;ids<=2*m-1;ids++){
         for(int idr = 0;idr<=2*m-1;idr++){

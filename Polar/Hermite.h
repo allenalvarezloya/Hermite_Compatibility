@@ -11,6 +11,8 @@ extern "C" void dgetrf_(int *, int *, double *, int *, int *, int *);
 extern "C" void dgemv_(char *,int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
 extern "C" void dgetrs_(char *,int *, int *, double *, int *, int *, double *, int *, int *);
 extern "C" void dgesvd_(char *,char *,int *,int *,double *,int *,double *,double *,int *,double *,int *,double *,int *,int *);
+
+extern "C" void eq_(double *,int *,int *,int *,double *,double *,double *);
 class Hermite {
 public:
     int m, nr, ns;
@@ -33,7 +35,7 @@ public:
     double HBessel(double nu,double x);
     void outPutMat(Darray2 &M,int i_start,int i_end,int j_start,int j_end,char* fName);
     void outPutVec(Darray1 &M,int i_start,int i_end,char* fName);
-    void computeSingular(int m,double hr,double hs,Darray4 &A01,Darray4 & A10,Darray4 & A11,Darray4 &A12,Darray4 & A22,int ns);
+    void computeSingular(int m,Darray2 Mat_u,int ns);
 };
 
 #endif

@@ -5,7 +5,7 @@
 using namespace std;
 extern "C" void dgetrs_(char *,int *, int *, double *, int *, int *, double *, int *, int *);
 int main(){
-	int m = 2;
+	int m = 3;
 	int COUNT = 1;
 	int refine = 3;
 	Darray1 errors1, errors2, errorsinf;

@@ -1,0 +1,6 @@
+semilogy(x,SM,x,SB,x,SM3,x,SB3,'LineWidth',2)
+legend('m = 2','m =2 Eq','m = 3','m = 3 Eq')
+legend('m = 2','m =2 Eq','m = 3','m = 3 Eq','FontSize',16)
+legend('m = 2','m =2 Eq','m = 3','m = 3 Eq','FontSize',12)
+xlabel('h','FontSize',20)
+ylabel('Condition Number','FontSize',20)

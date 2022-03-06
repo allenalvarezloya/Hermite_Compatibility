@@ -808,7 +808,7 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
                 offset++;
             }
         }
-        M2(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr);
+        M3(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr);
         columnScale(Mat_u,rhs_u,m);
         char fName[100];
         sprintf(fName, "Mu_inner.ext");
@@ -834,7 +834,7 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
                 offset++;
             }
         }
-        M1(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr);
+        M2(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr);
         columnScale(Mat_v,rhs_v,m-1);
         dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);                // Factor matrix
         dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
@@ -872,7 +872,7 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
                 offset++;
             }
         }
-        M2(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr);
+        M3(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr);
         columnScale(Mat_u,rhs_u,m);
         sprintf(fName, "Mu_outer.ext");
         outPutMat(Mat_u,0,(2*m+2)*(2*m+2)-1,0,(2*m+2)*(2*m+2)-1,fName);
@@ -897,7 +897,7 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
                 offset++;
             }
         }
-        M1(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr);
+        M2(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr);
         columnScale(Mat_v,rhs_v,m-1);
         dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);                  // Factor matrix
         dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
@@ -937,7 +937,7 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
             offset++;
         }
     }
-    M2(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr);
+    M3(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr);
     columnScale(Mat_u,rhs_u,m);
     dgetrf_(&Mboundary,&Nboundary,Mat_u_ptr,&LDAboundary,IPIV,&INFO);                  // Factor matrix
     dgetrs_(&no,&Nboundary,&ONE,Mat_u_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
@@ -961,7 +961,7 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
             offset++;
         }
     }
-    M1(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr);
+    M2(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr);
     columnScale(Mat_v,rhs_v,m-1);
     dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);                // Factor matrix
     dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
@@ -1000,7 +1000,7 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
             offset++;
         }
     }
-    M2(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr);
+    M3(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_u_ptr);
     columnScale(Mat_u,rhs_u,m);
     dgetrf_(&Mboundary,&Nboundary,Mat_u_ptr,&LDAboundary,IPIV,&INFO);                  // Factor matrix
     dgetrs_(&no,&Nboundary,&ONE,Mat_u_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO); // Solve system
@@ -1024,7 +1024,7 @@ void Hermite::boundaryConditions(int m,double hr,double hs,Darray4 &u,Darray4 &v
             offset++;
         }
     }
-    M1(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr);
+    M2(rA,rB,sA,sB,hr,hs,a01_ptr,a10_ptr,a11_ptr,a12_ptr,a22_ptr,Mat_v_ptr);
     columnScale(Mat_v,rhs_v,m-1);
     dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);                  // Factor matrix
     dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO); // Solve system
@@ -1294,10 +1294,10 @@ void Hermite::M2(double rA,double rB,double sA,double sB,double hr,double hs,
     matm2(&rA,&rB,&sA,&sB,a01,a10,a11,a12,a22,&hr,&hs,MM); 
 }
 
-// void Hermite::M3(double rA,double rB,double sA,double sB,double hr,double hs,
-//     double *a01,double* a10,double* a11,double* a12,double* a22,double *MM){
-//     matm3(&rA,&rB,&sA,&sB,a01,a10,a11,a12,a22,&hr,&hs,MM); 
-// }
+void Hermite::M3(double rA,double rB,double sA,double sB,double hr,double hs,
+    double *a01,double* a10,double* a11,double* a12,double* a22,double *MM){
+    matm3(&rA,&rB,&sA,&sB,a01,a10,a11,a12,a22,&hr,&hs,MM); 
+}
 
 
 

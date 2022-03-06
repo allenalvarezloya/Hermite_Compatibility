@@ -1,25 +1,25 @@
 #include "SetUp.h"
 
 void SetUp::compute_grids(){
-	r.define(0,nr);
-	s.define(0,ns);
-	hr = 1.0/double(nr);
-	hs = 1.0/double(ns);
-	for(int i = 0; i <= nr; i++){
-		r(i) = 0.0 + i*hr;
-	}
-	for(int j = 0; j <= ns; j++){
-		s(j) = 0.0 + j*hs;
-	}
-	// Dual Grids
-	rd.define(1,nr);
-	sd.define(1,ns);
-	for(int i = 1; i <= nr; i++){
-		rd(i) = 0.0 - 0.5*hr + hr*double(i);
-	}
-	for(int j = 1; j <= ns; j++){
-		sd(j) = 0.0 - 0.5*hs + hs*double(j);
-	}
+    r.define(0,nr);
+    s.define(0,ns);
+    hr = 1.0/double(nr);
+    hs = 1.0/double(ns);
+    for(int i = 0; i <= nr; i++){
+        r(i) = 0.0 + i*hr;
+    }
+    for(int j = 0; j <= ns; j++){
+        s(j) = 0.0 + j*hs;
+    }
+    // Dual Grids
+    rd.define(1,nr);
+    sd.define(1,ns);
+    for(int i = 1; i <= nr; i++){
+        rd(i) = 0.0 - 0.5*hr + hr*double(i);
+    }
+    for(int j = 1; j <= ns; j++){
+        sd(j) = 0.0 - 0.5*hs + hs*double(j);
+    }
     // Dual Grid extended
     rd_ext.define(0,nr+1);
     sd_ext.define(0,ns+1);
@@ -59,7 +59,7 @@ void SetUp::compute_initial_data(Darray4 &u, Darray4 &v){
 
 
 void transformation_x(int m,int nr_start,int ns_start,int nr, int ns, 
-	double hr, double hs,Darray1 &r,Darray1 &s,Darray4 &X,int metricOrder){
+    double hr, double hs,Darray1 &r,Darray1 &s,Darray4 &X,int metricOrder){
     Darray2 X_loc;
     int m2p1 = 2*m+1;
     X_loc.define(0,m2p1,0,m2p1);
@@ -82,7 +82,7 @@ void transformation_x(int m,int nr_start,int ns_start,int nr, int ns,
 }
 
 void transformation_y(int m,int nr_start,int ns_start,int nr, int ns, 
-	double hr, double hs,Darray1 &r,Darray1 &s,Darray4 &Y,int metricOrder){
+    double hr, double hs,Darray1 &r,Darray1 &s,Darray4 &Y,int metricOrder){
     Darray2 Y_loc;
     int m2p1 = 2*m+1;
     Y_loc.define(0,m2p1,0,m2p1);

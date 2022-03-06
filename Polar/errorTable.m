@@ -49,7 +49,7 @@ end
 plot(X(1:10:end,1:10:end),Y(1:10:end,1:10:end),'k',X(1:10:end,1:10:end)',Y(1:10:end,1:10:end)','k')
 
 m = 2;
-Ncells = 10*2.^(0:N-1)';
+Ncells = 5*2.^(0:N-1)';
 
 conv1 = log2(L1errors(1:end-1)./L1errors(2:end));
 conv2 = log2(L2errors(1:end-1)./L2errors(2:end));

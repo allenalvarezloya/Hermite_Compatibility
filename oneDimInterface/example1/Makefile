@@ -5,7 +5,7 @@
 CXX = /usr/bin/g++ -std=c++17
 FC = /usr/local/bin/gfortran
 LD  = /usr/bin/g++
-LDFLAGS := -lblas -llapack -lgfortran -L/Users/allenalvarezloya/Desktop/BConeDim -lHCOMPAT
+LDFLAGS := -lblas -llapack -lgfortran -L../ -lHCOMPAT
 CXXFLAGS = -O0 -DBZ_DEBUG
 
 

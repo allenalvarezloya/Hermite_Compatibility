@@ -94,7 +94,7 @@ int main(){
 
 		int COUNT = 0;
 		double time, dt, T;
-	    T = 10.0;
+	    T = 2.0;
 	    time = 0.0;
 	    while (time < T){
 	    	if (T > time + SetUp2.hr/D){

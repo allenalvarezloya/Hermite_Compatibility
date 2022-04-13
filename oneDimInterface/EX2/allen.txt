@@ -1,0 +1,2 @@
+Left c = 1.0, h = 0.1, dt = 0.1, CFL = 1
+Right c = 2.0, h = 0.2, dt = 0.1, CFL = 1

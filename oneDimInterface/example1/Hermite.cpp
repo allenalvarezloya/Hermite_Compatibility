@@ -164,7 +164,7 @@ void Hermite::HermiteMap(int m,double xl,double xr,double xc,int icase,Darray2 &
 }
 //------------------------------------------
 //------------------------------------------ 
-void Hermite::interpPD(Darray2 &u,Darray2 &v){
+void Hermite::interpPD(Darray2 &u){
     // LAPACK info
     int M,N,LDA,ONE;
     int Mv,Nv,LDAv;
@@ -186,7 +186,6 @@ void Hermite::interpPD(Darray2 &u,Darray2 &v){
     U.define(0,2*m+1);
     U.set_value(0.0);
     double *U_ptr = U.c_ptr();
-
     ud_interp.define(0,2*m+1,1,nr);
     ud_interp.set_value(0.0);
     for(int i = 0; i <= nr-1; i++){
@@ -199,29 +198,10 @@ void Hermite::interpPD(Darray2 &u,Darray2 &v){
             ud_interp(idr,i+1) = U(idr);
         }  
     }
-
-    // Arrays for interpolation
-    Darray1 V;
-    V.define(0,2*m-1);
-    V.set_value(0.0);
-    double *V_ptr = V.c_ptr();
-
-    vd_interp.define(0,2*m-1,1,nr);
-    vd_interp.set_value(0.0);
-    for(int i = 0; i <= nr-1; i++){
-        for(int idr = 0; idr <= m-1; idr++){
-            V(idr) = v(idr,i);
-            V(m+idr) = v(idr,i+1);
-        }
-        dgemv_(&no,&Mv,&Nv,&ALPHA,Hmap_v,&Nv,V_ptr,&ONE,&BETA,V_ptr,&ONE);
-        for(int idr= 0; idr <= 2*m-1; idr++){
-            vd_interp(idr,i+1) = V(idr);
-        }  
-    }
 }
 //------------------------------------------
 //------------------------------------------ 
-void Hermite::interpDP(Darray2 &ud,Darray2 &vd){
+void Hermite::interpDP(Darray2 &ud){
     // LAPACK info
     int M,N,LDA,ONE;
     int Mv,Nv,LDAv;
@@ -236,7 +216,6 @@ void Hermite::interpDP(Darray2 &ud,Darray2 &vd){
 
     // Create pointers to the maps for LAPACK routines
     double *Hmap_u = Hmat_u.c_ptr();
-    double *Hmap_v = Hmat_v.c_ptr();
 
     // Arrays for interpolation
     Darray1 U;
@@ -256,83 +235,112 @@ void Hermite::interpDP(Darray2 &ud,Darray2 &vd){
             u_interp(idr,i) = U(idr);
         }  
     }
+}
+//------------------------------------------
+//------------------------------------------ 
+void Hermite::boundaryReflection(Darray2 &ud){
+    // LAPACK info
+    int M,N,LDA,ONE;
+    int Mv,Nv,LDAv;
+    char no;
+    double ALPHA,BETA;
+    M = N = LDA = 2*m+2;
+    Mv = Nv = LDAv = 2*m;
+    ONE = 1;
+    no = 'N';
+    ALPHA = 1.0;
+    BETA = 0.0;
+
+    // Create pointers to the maps for LAPACK routines
+    double *Hmap_u = Hmat_u.c_ptr();
 
     // Arrays for interpolation
-    Darray1 V;
-    V.define(0,2*m-1);
-    V.set_value(0.0);
-    double *V_ptr = V.c_ptr();
-
-    v_interp.define(0,2*m-1,0,nr);
-    v_interp.set_value(0.0);
-    for(int i = 1; i <= nr-1; i++){
-        for(int idr = 0; idr <= m-1; idr++){
-            V(idr) = vd(idr,i);
-            V(m+idr) = vd(idr,i+1);
-        }
-        dgemv_(&no,&Mv,&Nv,&ALPHA,Hmap_v,&Nv,V_ptr,&ONE,&BETA,V_ptr,&ONE);
-        for(int idr = 0; idr <= 2*m-1; idr++){
-            v_interp(idr,i) = V(idr);
-        }  
-    }
-}
-//------------------------------------------
-//------------------------------------------ 
-void Hermite::recursion(Darray2 &u_int, Darray2 &v_int,Darray2 &u, Darray2 &v,int i,double h,double C,double dt){
-    int m2p1 = 2*m+1;
-    int q = 2*m+5;
-
-    // Create U and V arrays for recursion
-    Darray2 U, V;
-    U.define(0,2*m+3,0,q);
-    V.define(0,2*m+3,0,q);
+    Darray1 U;
+    U.define(0,2*m+1);
     U.set_value(0.0);
-    V.set_value(0.0);
+    double *U_ptr = U.c_ptr();
 
-    // Set values for s = 0
+    for(int idr = 0; idr <= m; idr++){
+        U(idr) = pow(-1.0,idr+1)*ud(idr,1);
+        U(m+1+idr) = ud(idr,1);
+    }
+    dgemv_(&no,&M,&N,&ALPHA,Hmap_u,&N,U_ptr,&ONE,&BETA,U_ptr,&ONE);
     for(int idr = 0; idr <= 2*m+1; idr++){
-        U(idr,0) = u_int(idr,i);
+        u_interp(idr,0) = U(idr);
+    }  
+    for(int idr = 0; idr <= m; idr++){
+        U(idr) = ud(idr,nr);
+        U(m+1+idr) = pow(-1.0,idr+1)*ud(idr,nr);
     }
-    for(int idr = 0; idr <= 2*m-1; idr++){
-        V(idr,0) = v_int(idr,i);
-    }
-
-    for(int s = 1; s <= q; s++){
-        for(int idr = 0; idr <= m2p1; idr++){
-            U(idr,s) = dt*V(idr,s-1)/s;
-            V(idr,s) = C*C*(idr+2)*(idr+1)*dt*U(idr+2,s-1)/(h*h*s);
-        }
-    }
-
-    for(int k = 0; k <= m; k++){
-        double Uval = 0.0;
-        for(int s =0; s <= q; s++){
-            Uval += U(k,s)*pow(0.5,s);
-        }
-        u(k,i) = Uval;
-    }
-    for(int k = 0; k <= m-1; k++){
-        double Vval = 0.0;
-        for(int s = 0; s <= q; s++){
-            Vval += V(k,s)*pow(0.5,s);
-        }
-        v(k,i) = Vval;
-    }
-
+    dgemv_(&no,&M,&N,&ALPHA,Hmap_u,&N,U_ptr,&ONE,&BETA,U_ptr,&ONE);
+    for(int idr = 0; idr <= 2*m+1; idr++){
+        u_interp(idr,nr) = U(idr);
+    }  
 }
 //------------------------------------------
 //------------------------------------------ 
-void Hermite::boundaryConditions(int m, double hr,Darray2 &u, Darray2 &v){
+void Hermite::laplacian(int m,Darray1 &u,double h){
+    int m2p1 = 2*m+1;
+    Darray1 lapU;
+    lapU.define(0,m2p1);
+    lapU.set_value(0.0);
+    for(int idr = 0; idr <= m2p1-2; idr++){
+        lapU(idr) = double(idr+2)*double(idr+1)*u(idr+2)/(h*h); 
+    }
+    u.set_value(0.0);
+    for(int idr = 0; idr <= m2p1-2; idr++){
+        u(idr) = lapU(idr); 
+    }
+}
+//------------------------------------------
+//------------------------------------------ 
+void Hermite::recursion(Darray2 &u_int, Darray2 &um_int,Darray2 &u,int i,double h,double C,double dt){
+    int m2p1 = 2*m+1;
+    Darray1 Sum;
+    Sum.define(0,m2p1);
+    Darray1 lapU;
+    lapU.define(0,m2p1);
+    Sum.set_value(0.0);
+    lapU.set_value(0.0);
+    for(int idr = 0; idr <= m2p1; idr++){
+        Sum(idr) = u_int(idr,i);
+        lapU(idr) = u_int(idr,i);
+    }
+    laplacian(m,lapU,h);
+    double scale;
+    for(int l = 1; l <= 2*m; l++){
+        scale = pow(0.5*C*dt,2.0*l)/tgamma(2.0*l+1);
+        for(int idr = 0; idr <= m2p1; idr++){
+            Sum(idr) += scale*lapU(idr);
+        }
+        laplacian(m,lapU,h);
+    }
+    for(int idr = 0; idr <= m; idr++){
+        u(idr,i) = 2*Sum(idr) - um_int(idr,i);
+    }
+}
+//------------------------------------------
+//------------------------------------------ 
+void Hermite::recursion2(Darray2 &u_int,Darray2 &u,int i,double h,double C,double dt){
+    double S = 0.0;
+    double scale = 0.0;
+    for(int k = 0; k <= m; k++){
+        S = 0.0;
+        for(int l = 0; l <= m - floor(k/2); l++){
+            scale = pow(0.5*C*(dt/h),2*l)*tgamma(2*l+k+1)/tgamma(2*l+1)/tgamma(k+1);
+            S += scale*u_int(2*l+k,i);
+        }
+        u(k,i) = 2*S - u(k,i);
+    }
+}
+//------------------------------------------
+//------------------------------------------ 
+void Hermite::boundaryConditions(int m, double hr,Darray2 &u){
     int m2p1 = 2*m+1;
     // LAPACK info for u
     int Mboundary,Nboundary,LDAboundary;
     Mboundary = Nboundary = LDAboundary = (2*m+2);
     int IPIV[(2*m+2)];
-    // LAPACK info for v
-    int Mboundary_v,Nboundary_v,LDAboundary_v;
-    Mboundary_v = Nboundary_v = LDAboundary_v = (2*m);
-    int IPIV_v[(2*m)];
-    // LAPACK info for both
     int INFO;
     int ONE = 1;
     char no = 'N';
@@ -342,17 +350,10 @@ void Hermite::boundaryConditions(int m, double hr,Darray2 &u, Darray2 &v){
     Mat_u.define(0,m2p1,0,m2p1);
     Mat_u.set_value(0.0);
     double* Mat_u_ptr = Mat_u.c_ptr();
-    Darray2 Mat_v;
-    Mat_v.define(0,m2p1,0,m2p1);
-    Mat_v.set_value(0.0);
-    double* Mat_v_ptr = Mat_v.c_ptr();
 
     Darray1 rhs_u;
     rhs_u.define(0,m2p1);
     double* rhs_u_ptr = rhs_u.c_ptr();
-    Darray1 rhs_v;
-    rhs_v.define(0,m2p1);
-    double* rhs_v_ptr = rhs_v.c_ptr();
 
     // Left side
     double rA = 0.5;
@@ -366,17 +367,6 @@ void Hermite::boundaryConditions(int m, double hr,Darray2 &u, Darray2 &v){
     for(int idr = 0; idr <= m2p1; idr++){
         u_interp(idr,0) = rhs_u(idr)*pow(hr,idr);
     }
-
-    rhs_v.set_value(0.0);
-    for(int idr = 0; idr <= m-1; idr++){
-        rhs_v(m+idr) = tgamma(idr+1)*v(idr,1)/pow(hr,idr);
-    }
-    bcMat(rA,hr,Mat_v_ptr,m-1);
-    dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);
-    dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO);
-    for(int idr = 0; idr <= 2*m-1; idr++){
-        v_interp(idr,0) = rhs_v(idr)*pow(hr,idr);
-    }
     // Right side
     rA = -0.5;
     rhs_u.set_value(0.0);
@@ -389,105 +379,94 @@ void Hermite::boundaryConditions(int m, double hr,Darray2 &u, Darray2 &v){
     for(int idr = 0; idr <= m2p1; idr++){
         u_interp(idr,nr) = rhs_u(idr)*pow(hr,idr);
     }
-
-    rhs_v.set_value(0.0);
-    for(int idr = 0; idr <= m-1; idr++){
-        rhs_v(m+idr) = tgamma(idr+1)*v(idr,nr)/pow(hr,idr);
-    }
-    bcMat(rA,hr,Mat_v_ptr,m-1);
-    dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);
-    dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO);
-    for(int idr = 0; idr <= 2*m-1; idr++){
-        v_interp(idr,nr) = rhs_v(idr)*pow(hr,idr);
-    }
 }
 //------------------------------------------
 //------------------------------------------ 
-void Hermite::interfaceConditions(int m,double hu,double hv,double C,double D,Darray2 &u1,Darray2 &u2, Darray2 &v1, Darray2 &v2,int i1,int i2,int iout,int side){
-    // LAPACK info for u
-    int Mboundary,Nboundary,LDAboundary;
-    Mboundary = Nboundary = LDAboundary = 2*(2*m+2);
-    int IPIV[2*(2*m+2)];
+// void Hermite::interfaceConditions(int m,double hu,double hv,double C,double D,Darray2 &u1,Darray2 &u2, Darray2 &v1, Darray2 &v2,int i1,int i2,int iout,int side){
+//     // LAPACK info for u
+//     int Mboundary,Nboundary,LDAboundary;
+//     Mboundary = Nboundary = LDAboundary = 2*(2*m+2);
+//     int IPIV[2*(2*m+2)];
 
-    // LAPACK info for v
-    int Mboundary_v,Nboundary_v,LDAboundary_v;
-    Mboundary_v = Nboundary_v = LDAboundary_v = 2*(2*m);
-    int IPIV_v[2*(2*m)];
-    // LAPACK info for both
-    int INFO;
-    int ONE = 1;
-    char no = 'N';
+//     // LAPACK info for v
+//     int Mboundary_v,Nboundary_v,LDAboundary_v;
+//     Mboundary_v = Nboundary_v = LDAboundary_v = 2*(2*m);
+//     int IPIV_v[2*(2*m)];
+//     // LAPACK info for both
+//     int INFO;
+//     int ONE = 1;
+//     char no = 'N';
 
-    Darray2 Mat_u;
-    Mat_u.define(0,2*(2*m+1)+1,0,2*(2*m+1)+1);
-    Mat_u.set_value(0.0);
-    double *Mat_u_ptr = Mat_u.c_ptr();
-    interface(hu,hv,C,D,Mat_u_ptr,m);
-    char fName[100];
-    sprintf(fName, "interfaceMat.ext");
-    outPutMat(Mat_u,0,2*(2*m+1)+1,0,2*(2*m+1)+1,fName);
+//     Darray2 Mat_u;
+//     Mat_u.define(0,2*(2*m+1)+1,0,2*(2*m+1)+1);
+//     Mat_u.set_value(0.0);
+//     double *Mat_u_ptr = Mat_u.c_ptr();
+//     interface(hu,hv,C,D,Mat_u_ptr,m);
+//     char fName[100];
+//     sprintf(fName, "interfaceMat.ext");
+//     outPutMat(Mat_u,0,2*(2*m+1)+1,0,2*(2*m+1)+1,fName);
 
-    // Right Hand Side
-    Darray1 rhs_u;
-    rhs_u.define(0,2*(2*m+1)+1);
-    double* rhs_u_ptr = rhs_u.c_ptr();
-    rhs_u.set_value(0.0);
-    for(int idr = 0; idr <= m; idr++){
-        rhs_u(2*m+2+idr) = tgamma(idr+1)*u1(idr,i1)/pow(hu,idr);
-        rhs_u(3*m+3+idr) = tgamma(idr+1)*u2(idr,i2)/pow(hv,idr);
-    }
+//     // Right Hand Side
+//     Darray1 rhs_u;
+//     rhs_u.define(0,2*(2*m+1)+1);
+//     double* rhs_u_ptr = rhs_u.c_ptr();
+//     rhs_u.set_value(0.0);
+//     for(int idr = 0; idr <= m; idr++){
+//         rhs_u(2*m+2+idr) = tgamma(idr+1)*u1(idr,i1)/pow(hu,idr);
+//         rhs_u(3*m+3+idr) = tgamma(idr+1)*u2(idr,i2)/pow(hv,idr);
+//     }
 
-    dgetrf_(&Mboundary,&Nboundary,Mat_u_ptr,&LDAboundary,IPIV,&INFO);
-    dgetrs_(&no,&Nboundary,&ONE,Mat_u_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO);
-    if (side == 1){
-        for(int i = 0; i <= 2*m+1; i++){
-            u_interp(i,iout) = rhs_u(i);
-        }
-    }
-    else
-    {
-        for(int i = 0; i <= 2*m+1; i++){
-            u_interp(i,iout) = rhs_u(2*m+2+i);
-        }
+//     dgetrf_(&Mboundary,&Nboundary,Mat_u_ptr,&LDAboundary,IPIV,&INFO);
+//     dgetrs_(&no,&Nboundary,&ONE,Mat_u_ptr,&Nboundary,IPIV,rhs_u_ptr,&Nboundary,&INFO);
+//     if (side == 1){
+//         for(int i = 0; i <= 2*m+1; i++){
+//             u_interp(i,iout) = rhs_u(i);
+//         }
+//     }
+//     else
+//     {
+//         for(int i = 0; i <= 2*m+1; i++){
+//             u_interp(i,iout) = rhs_u(2*m+2+i);
+//         }
 
-    }
+//     }
     
-    Darray2 Mat_v;
-    Mat_v.define(0,2*(2*m-1)+1,0,2*(2*m-1)+1);
-    Mat_v.set_value(0.0);
-    double *Mat_v_ptr = Mat_v.c_ptr();
-    interface(hu,hv,C,D,Mat_v_ptr,m-1);
+//     Darray2 Mat_v;
+//     Mat_v.define(0,2*(2*m-1)+1,0,2*(2*m-1)+1);
+//     Mat_v.set_value(0.0);
+//     double *Mat_v_ptr = Mat_v.c_ptr();
+//     interface(hu,hv,C,D,Mat_v_ptr,m-1);
 
-    // Right Hand Side
-    Darray1 rhs_v;
-    rhs_v.define(0,2*(2*m-1)+1);
-    double* rhs_v_ptr = rhs_v.c_ptr();
-    rhs_v.set_value(0.0);
-    for(int idr = 0; idr <= m-1; idr++){
-        rhs_v(2*m+idr) = tgamma(idr+1)*v1(idr,i1)/pow(hu,idr);
-        rhs_v(3*m+idr) = tgamma(idr+1)*v2(idr,i2)/pow(hv,idr);
-    }
+//     // Right Hand Side
+//     Darray1 rhs_v;
+//     rhs_v.define(0,2*(2*m-1)+1);
+//     double* rhs_v_ptr = rhs_v.c_ptr();
+//     rhs_v.set_value(0.0);
+//     for(int idr = 0; idr <= m-1; idr++){
+//         rhs_v(2*m+idr) = tgamma(idr+1)*v1(idr,i1)/pow(hu,idr);
+//         rhs_v(3*m+idr) = tgamma(idr+1)*v2(idr,i2)/pow(hv,idr);
+//     }
 
-    dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);
-    dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO);
+//     dgetrf_(&Mboundary_v,&Nboundary_v,Mat_v_ptr,&LDAboundary_v,IPIV_v,&INFO);
+//     dgetrs_(&no,&Nboundary_v,&ONE,Mat_v_ptr,&Nboundary_v,IPIV_v,rhs_v_ptr,&Nboundary_v,&INFO);
 
-    for(int i = 0; i <= 2*m-1; i++){
-        v_interp(i,iout) = rhs_v(i);
-    }
+//     for(int i = 0; i <= 2*m-1; i++){
+//         v_interp(i,iout) = rhs_v(i);
+//     }
 
-    if (side == 1){
-        for(int i = 0; i <= 2*m-1; i++){
-            v_interp(i,iout) = rhs_v(i);
-        }
-    }
-    else
-    {
-        for(int i = 0; i <= 2*m-1; i++){
-            v_interp(i,iout) = rhs_v(2*m+i);
-        }
+//     if (side == 1){
+//         for(int i = 0; i <= 2*m-1; i++){
+//             v_interp(i,iout) = rhs_v(i);
+//         }
+//     }
+//     else
+//     {
+//         for(int i = 0; i <= 2*m-1; i++){
+//             v_interp(i,iout) = rhs_v(2*m+i);
+//         }
 
-    }
-}
+//     }
+// }
 //------------------------------------------
 //------------------------------------------ 
 void Hermite::outPutMat(Darray2 &M,int i_start,int i_end,int j_start,int j_end,char* fName){
@@ -524,17 +503,17 @@ void Hermite::bcMat(double rA,double hr,double *MM,int m_mat){
 }
 //------------------------------------------
 //------------------------------------------ 
-void Hermite::interface(double hu,double hv,double C,double D,double *MM, int m_mat){
-    if(m_mat == 1){
-        intm1(&hu,&hv,&C,&D,MM);
-    }
-    else if(m_mat == 2){
-        intm2(&hu,&hv,&C,&D,MM);
-    }
-    else if(m_mat == 3){
-        intm3(&hu,&hv,&C,&D,MM);
-    }
-}
+// void Hermite::interface(double hu,double hv,double C,double D,double *MM, int m_mat){
+//     if(m_mat == 1){
+//         intm1(&hu,&hv,&C,&D,MM);
+//     }
+//     else if(m_mat == 2){
+//         intm2(&hu,&hv,&C,&D,MM);
+//     }
+//     else if(m_mat == 3){
+//         intm3(&hu,&hv,&C,&D,MM);
+//     }
+// }
 
 void Hermite::oversample(Darray2 &u,int nr,int m,char* fName){
     int nrefine = 10;
@@ -559,4 +538,11 @@ void Hermite::oversample(Darray2 &u,int nr,int m,char* fName){
     outPutVec(u_oversample,0,nr*nrefine,fName);
 }
 
+void Hermite::arrayCopy(Darray2 &u,Darray2 &v,int is,int ie,int js,int je){
+    for(int i = is; i <= ie; i++){
+        for(int j = js; j <= je; j++){
+            u(i,j) = v(i,j);
+        }
+    }
+}
 

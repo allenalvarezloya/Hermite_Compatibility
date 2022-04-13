@@ -1,28 +1,27 @@
-U1 = dir('u1oversampled*.ext');
-N1 = length(U1);
-L2_1 = zeros(N1,1);
-for k = 1:N1
+close all
+U1 = dir('u1m1oversampled*.ext');
+U2 = dir('u1m2oversampled*.ext');
+U3 = dir('u1m3oversampled*.ext');
+N = length(U1);
+L2_m1 = zeros(N,1);
+L2_m2 = zeros(N,1);
+L2_m3 = zeros(N,1);
+H = zeros(N,1);
+for k = 1:N
     u1 = load(U1(k).name);
-    n1 = length(u1)-1;
-    h1 = 1.0/n1;
-    x1 = 0 + h1*(0:n1)';
-    uexact1 = -sin(4*pi*x1);
-    L2_1(k) = sqrt(h1*sum((u1(1:n1/2+1) - uexact1(1:n1/2+1)).^2));
-end
-
-U2 = dir('u2oversampled*.ext');
-N2 = length(U2);
-L2_2 = zeros(N2,1);
-for k = 1:N2
     u2 = load(U2(k).name);
-    n2 = length(u2)-1;
-    h2 = 1.0/n2;
-    x2 = 0 + h2*(0:n2)';
-    uexact2 = sin(2*pi*x2);
-    L2_2(k) = sqrt(h2*sum((u2(n2/2+1:end) - uexact2(n2/2+1:end)).^2));
+    u3 = load(U3(k).name);
+    n = length(u1)-1;
+    h = 1.0/n;
+    x = 0.0 + h*(0:n)';
+    uex = sin(2*pi*x)*cos(2*pi*1.3);
+    L2_m1(k) = sqrt(h*sum((u1 - uex).^2));
+    L2_m2(k) = sqrt(h*sum((u2 - uex).^2));
+    L2_m3(k) = sqrt(h*sum((u3 - uex).^2));
+    H(k) = h;
 end
-
-L2 = L2_1 + L2_2;
-L2conv = log2(L2(1:end-1)./L2(2:end))
-
-
+loglog(H,L2_m1,H,L2_m2,H,L2_m3,'LineWidth',2)
+hold on 
+loglog(H,50e1*H.^2,'k--',H,15e3*H.^4,'k--',H,30e4*H.^6,'k--','LineWidth',2)
+hold off
+legend('m =1 conservative','m = 2 Conservative','m = 3 Conservative','','','')

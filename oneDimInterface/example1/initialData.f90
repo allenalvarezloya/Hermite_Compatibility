@@ -1,4 +1,4 @@
-SUBROUTINE get_Taylor1d(u,x,mx,mxi,hx,func,Icase)
+SUBROUTINE get_Taylor1d(u,x,t,mx,mxi,hx,func)
   !
   IMPLICIT NONE
   !
@@ -9,14 +9,13 @@ SUBROUTINE get_Taylor1d(u,x,mx,mxi,hx,func,Icase)
   ! Here hx is the cell width and mxi is the
   ! degree of the interpolant
   !
-  INTEGER, INTENT(IN) :: mx,mxi, Icase
-  DOUBLE PRECISION, INTENT(IN) :: x,hx
+  INTEGER, INTENT(IN) :: mx,mxi
+  DOUBLE PRECISION, INTENT(IN) :: x,hx,t
   DOUBLE PRECISION, DIMENSION(0:mx), INTENT(OUT) :: u
   !
   INTERFACE
-     DOUBLE PRECISION FUNCTION func(x,Icase)
-       DOUBLE PRECISION, INTENT(IN) :: x
-       INTEGER, INTENT(IN) :: Icase
+     DOUBLE PRECISION FUNCTION func(x,t)
+       DOUBLE PRECISION, INTENT(IN) :: x, t
      END FUNCTION func
   END INTERFACE
   !
@@ -37,7 +36,7 @@ SUBROUTINE get_Taylor1d(u,x,mx,mxi,hx,func,Icase)
 
   DO jx=0,mxi
      zx=x-.5d0*hx*COS(pi*DBLE(jx)/DBLE(mxi))
-     yx(jx)=func(zx,Icase)
+     yx(jx)=func(zx,t)
   END DO
   !
   CALL point_to_Taylor(mxi,yx,wx)
@@ -84,40 +83,32 @@ SUBROUTINE point_to_Taylor(q,y,p)
   !
 END SUBROUTINE point_to_Taylor
 
-SUBROUTINE indat(floc,r,hr,m,Icase)
+SUBROUTINE indat(floc,r,t,hr,m)
   implicit none
-  INTEGER, INTENT(IN) :: m, Icase
-  DOUBLE PRECISION, INTENT(IN) :: hr,r
+  INTEGER, INTENT(IN) :: m
+  DOUBLE PRECISION, INTENT(IN) :: hr,r,t
   DOUBLE PRECISION, DIMENSION(0:m) :: floc
   
   INTERFACE 
-     DOUBLE PRECISION FUNCTION ss(r,Icase)
-       DOUBLE PRECISION, INTENT(IN) :: r 
-       INTEGER, INTENT(IN) :: Icase
+     DOUBLE PRECISION FUNCTION ss(r,t)
+       DOUBLE PRECISION, INTENT(IN) :: r, t
      END FUNCTION ss
   END INTERFACE
   
-  CALL get_Taylor1d(floc,r,m,2*m+1,hr,ss,Icase)
+  CALL get_Taylor1d(floc,r,t,m,15,hr,ss)
 
 END SUBROUTINE indat
 
-DOUBLE PRECISION FUNCTION ss(r,Icase)
+DOUBLE PRECISION FUNCTION ss(r,t)
   !
-  DOUBLE PRECISION, INTENT(IN) :: r
+  DOUBLE PRECISION, INTENT(IN) :: r, t
   DOUBLE PRECISION :: x,y 
-  INTEGER, INTENT(IN) :: Icase
   DOUBLE PRECISION :: pi = 3.1415926535897932385d0
   ! Cartesian
   ! x = r 
   ! y = s
   ! Polar Grid
-  x = 2*r-1
-  IF (Icase == 0) THEN
-   ss = cos(2*pi*x)
-  ELSE IF (Icase == 1) THEN
-   ss = cos(4*pi*x)
-  ELSE if (Icase == 2) THEN
-   ss = x 
-  END IF 
+  x = r
+  ss = sin(2*pi*x)*cos(2*pi*t)
   !
 END FUNCTION ss

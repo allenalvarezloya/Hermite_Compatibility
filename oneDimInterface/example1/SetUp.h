@@ -6,7 +6,7 @@
 #include "Darrays.h"
 
 using namespace std;
-extern "C" void indat_(double *,double *,double *,int *,int *);
+extern "C" void indat_(double *,double *,double *,double *,int *);
 
 class SetUp{
 public:
@@ -15,7 +15,7 @@ public:
 	double hr;                   // Cell width
 	Darray1 r,rd;                // Allocate grid arrays
 	void compute_grids();        // Compute primal and dual grids
-	void compute_initial_data(Darray2 &u,int I); // Compute iniital data
+	void compute_initial_data(Darray2 &u,Darray1 &r,int ns,int ne,double t); // Compute iniital data
 };
 
 #endif

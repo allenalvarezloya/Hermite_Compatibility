@@ -11,6 +11,9 @@ CXXINCLUDE =
 CXXFLAGS = -O0 
 AR = ar 
 
+FILE = obj0.txt
+OBJECTS_M0 :=$(file < $(FILE))
+
 FILE = obj1.txt
 OBJECTS_M1 :=$(file < $(FILE))
 
@@ -19,6 +22,9 @@ OBJECTS_M2 :=$(file < $(FILE))
 
 FILE = obj3.txt
 OBJECTS_M3 :=$(file < $(FILE))
+
+FILE = intObj0.txt
+OBJECTS_intM0 :=$(file < $(FILE))
 
 FILE = intObj1.txt
 OBJECTS_intM1 :=$(file < $(FILE))
@@ -40,7 +46,10 @@ EXEC = main.x
 
 .PHONY: clean
 
-all: libM1 libM2 libM3 libint1 libint2 libint3 #libM4 libM5
+all: libM0 libM1 libM2 libM3 libint0 libint1 libint2 libint3 #libM4 libM5
+
+libM0: $(OBJECTS_M0) 
+	$(AR) rcs libHCOMPAT.a $(OBJECTS_M0) 
 
 libM1: $(OBJECTS_M1) 
 	$(AR) rcs libHCOMPAT.a $(OBJECTS_M1) 
@@ -48,9 +57,11 @@ libM1: $(OBJECTS_M1)
 libM2: $(OBJECTS_M2) 
 	$(AR) rcs libHCOMPAT.a $(OBJECTS_M2) 
 
-
 libM3: $(OBJECTS_M3) 
 	$(AR) rcs libHCOMPAT.a $(OBJECTS_M3) 
+
+libint0: $(OBJECTS_intM0) 
+	$(AR) rcs libHCOMPAT.a $(OBJECTS_intM0) 
 
 libint1: $(OBJECTS_intM1) 
 	$(AR) rcs libHCOMPAT.a $(OBJECTS_intM1) 
